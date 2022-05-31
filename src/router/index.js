@@ -1,18 +1,19 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Header from '../components/Header'
-import Loging from '../components/Loging'
 Vue.use(Router)
 
 export default new Router({
-  routes: [
-    {
-      path: '/Header',
-      component:Header
+  routes: [{
+      path: '/home',
+      component: () => import("@/views/home/index")
     },
     {
       path: '/',
-      component:Loging
-    }
+      component: () => import("@/views/login/index")
+    },
+    // {
+    //   path: '/header',
+    //   component: () => import("@/components/Header")
+    // }
   ]
 })

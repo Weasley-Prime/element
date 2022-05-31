@@ -1,7 +1,7 @@
 <template>
   <div>
     <div>
-      <el-form :rules="rules" ref="form" :model="form" class="loging">
+      <el-form :rules="rules" ref="form" :model="form" class="loging" @keydown.enter.native="onSubmit">
         <h3 class="loging-title">登录</h3>
         <el-form-item prop="username">
           <el-input v-model="form.username" placeholder="用户名"></el-input>
@@ -13,18 +13,18 @@
             placeholder="密码"
           ></el-input>
         </el-form-item>
-        <el-form-item prop="code">
+        <!-- <el-form-item prop="code">
           <el-input
             type="text"
             v-model="form.code"
             placeholder="验证码"
             style="width: 45%"
           ></el-input>
-          <img :src="myurl" @click="update" class="captcha"/>
-        </el-form-item>
-        <el-checkbox v-model="checked" class="loging-check">登录</el-checkbox>
-        <el-form-item>
-          <el-button type="primary" @click="onSubmit" class="log"
+          <el-image :src="myurl" class="captcha" style="float: right;"/>
+        </el-form-item> -->
+        <el-checkbox v-model="checked" class="logingCheck">记住账号</el-checkbox>
+        <el-form-item style="margin-top: 10px">
+          <el-button v-loading="loading" type="primary" @click="onSubmit" class="log"
             >登录</el-button
           >
           <el-button class="access">注册</el-button>
@@ -35,15 +35,20 @@
 </template>
 
 <script>
+import { login } from '@/api/login/request.js'
+import store from '@/store/index.js'
+// import axios from 'axios'
+// Vue.prototype.$axios=axios
+
 export default {
   name: "Loging",
   data() {
     return {
-      myurl: "/captcha?time="+new Date(),
+      myurl: '',
       form: {
-        username: "",
-        password: "",
-        code: "",
+        username: '',
+        password: '',
+        // code: "",
       },
       checked: false,
       rules: {
@@ -51,27 +56,42 @@ export default {
           { required: true, message: "请输入用户名", trigger: "blur" }
         ],
         password: [{ required: true, message: "请输入密码", trigger: "blur" }],
-        code: [{ required: true, message: "请输入验证码", trigger: "blur" }],
+        // code: [{ required: true, message: "请输入验证码", trigger: "blur" }],
       },
+      loading: false
     };
   },
+  created() {
+    // this.myurl = captcha()
+  },
   methods: {
-    update(){
-      this.myurl="/captcha?time="+new Date()
-    },
     onSubmit() {
       this.$refs.form.validate((valid) => {
         if (valid) {
-          this.axios.post('/login',this.form)
-          .then(function(res){
-            alert(res)
+        //   this.$axios({
+        //     method: 'post',
+        //     url: '/api/v1/test/login',
+        //     data: this.form
+        // })
+        //   .then((res)=>{
+        //     console.log(res)
+        //   })
+          login(this.form).then((res)=>{
+            console.log(res)
+            if (res.code === 0) {
+              // this.$router.push(
+              // '/home'
+              // )
+              store.setMessageAction(res.data)
+              console.log(this.$store.state.message)
+            }
           })
-          .catch(function(err){
+          .catch((err) => {
             console.log(err)
+            
+            // this.$message.error(err.data.message)
           })
-        
         } else {
-          this.$message.error("请输入所有字段");
           return false;
         }
       });
@@ -104,6 +124,6 @@ export default {
   width: 45%;
 }
 .captcha {
-  width: 44%
+  width: 45%
 }
 </style>
